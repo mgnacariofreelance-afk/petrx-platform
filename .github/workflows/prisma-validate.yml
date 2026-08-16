@@ -1,0 +1,26 @@
+name: Prisma Schema Validation
+
+on:
+  push:
+    paths:
+      - 'prisma/schema.prisma'
+      - '.github/workflows/prisma-validate.yml'
+  pull_request:
+    paths:
+      - 'prisma/schema.prisma'
+      - '.github/workflows/prisma-validate.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate Prisma schema
+        run: npx --yes prisma@6 validate --schema=prisma/schema.prisma
