@@ -9,6 +9,7 @@ on:
     paths:
       - 'prisma/schema.prisma'
       - '.github/workflows/prisma-validate.yml'
+  workflow_dispatch:
 
 jobs:
   validate:
