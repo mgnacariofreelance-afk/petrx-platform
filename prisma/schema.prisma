@@ -252,6 +252,11 @@ model Organization {
 
   @@index([typeId, status])
   @@map("organizations")
+  productCategories ProductCategory[]
+  sales            Sale[]
+  expenses         Expense[]
+  arInvoices       ArInvoice[]
+  apBills          ApBill[]
 }
 
 model Branch {
