@@ -14,6 +14,8 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/petrx_validation
     steps:
       - name: Checkout
         uses: actions/checkout@v4
