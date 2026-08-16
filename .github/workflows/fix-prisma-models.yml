@@ -1,0 +1,33 @@
+name: Fix Prisma Models
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fix-prisma-models.yml"
+      - "prisma/schema.prisma"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Convert Prisma models
+        run: |
+          sed -i -E 's/^type ([A-Za-z_][A-Za-z0-9_]*) \{$/model \1 {/' prisma/schema.prisma
+
+      - name: Commit schema fix
+        run: |
+          if git diff --quiet -- prisma/schema.prisma; then
+            echo "No Prisma model declaration changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prisma/schema.prisma
+          git commit -m "fix(prisma): convert schema type declarations to models"
+          git push
