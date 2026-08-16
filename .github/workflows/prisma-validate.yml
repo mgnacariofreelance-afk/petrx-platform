@@ -24,4 +24,5 @@ jobs:
           node-version: 22
 
       - name: Validate Prisma schema
-        run: npx --yes prisma@6 validate --schema=prisma/schema.prisma
+        run: |
+          npx --yes prisma@6 validate --schema=prisma/schema.prisma
