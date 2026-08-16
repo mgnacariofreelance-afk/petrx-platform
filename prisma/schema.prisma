@@ -250,13 +250,13 @@ model Organization {
   roles          Role[]
   clinicalCases  ClinicalCase[]
 
-  @@index([typeId, status])
-  @@map("organizations")
   productCategories ProductCategory[]
   sales            Sale[]
   expenses         Expense[]
   arInvoices       ArInvoice[]
   apBills          ApBill[]
+  @@index([typeId, status])
+  @@map("organizations")
 }
 
 model Branch {
