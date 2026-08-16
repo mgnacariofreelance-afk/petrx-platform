@@ -25,4 +25,5 @@ jobs:
 
       - name: Validate Prisma schema
         run: |
+          echo "Validating current PetRx Prisma schema"
           npx --yes prisma@6 validate --schema=prisma/schema.prisma
