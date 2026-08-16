@@ -53,10 +53,10 @@ jobs:
               "  apBills          ApBill[]",
           ]
 
-          match = re.search(r"model Organization \\{(.*?)^\\}", text, flags=re.MULTILINE | re.DOTALL)
+          match = re.search(r"model Organization \{(.*?)^\}", text, flags=re.MULTILINE | re.DOTALL)
           if match:
               block = match.group(0)
-              additions = [line for line in organization_fields if line.strip().split()[0] not in block]
+              additions = [line for line in organization_fields if line.split()[0] not in block]
               if additions:
                   block = block.rsplit("\n}", 1)[0] + "\n" + "\n".join(additions) + "\n}"
                   text = text[:match.start()] + block + text[match.end():]
