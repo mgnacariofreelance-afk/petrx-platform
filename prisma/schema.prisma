@@ -40,7 +40,7 @@ enum SubscriptionStatus { TRIAL ACTIVE PAST_DUE CANCELLED EXPIRED }
 enum SubscriptionPlanCode { STARTER PROFESSIONAL ENTERPRISE }
 enum AuditAction { CREATE UPDATE DELETE LOGIN LOGOUT VIEW EXPORT INVITE ACTIVATE SUSPEND }
 
-type User {
+model User {
   id                 String           @id @default(uuid()) @db.Uuid
   organizationId     String           @db.Uuid
   firstName          String           @db.VarChar(100)
@@ -76,7 +76,7 @@ type User {
   @@map("users")
 }
 
-type EmploymentType {
+model EmploymentType {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @unique @db.VarChar(100)
   active    Boolean  @default(true)
@@ -86,7 +86,7 @@ type EmploymentType {
   @@map("employment_types")
 }
 
-type OrganizationType {
+model OrganizationType {
   id            String               @id @default(uuid()) @db.Uuid
   code          OrganizationTypeCode @unique
   name          String               @db.VarChar(100)
@@ -94,7 +94,7 @@ type OrganizationType {
   @@map("organization_types")
 }
 
-type Organization {
+model Organization {
   id             String             @id @default(uuid()) @db.Uuid
   typeId         String             @db.Uuid
   name           String             @db.VarChar(255)
@@ -124,7 +124,7 @@ type Organization {
   @@map("organizations")
 }
 
-type Branch {
+model Branch {
   id           String       @id @default(uuid()) @db.Uuid
   organizationId String     @db.Uuid
   name         String       @db.VarChar(150)
@@ -141,7 +141,7 @@ type Branch {
   @@map("branches")
 }
 
-type Department {
+model Department {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   branchId       String?      @db.Uuid
@@ -154,7 +154,7 @@ type Department {
   @@map("departments")
 }
 
-type Role {
+model Role {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String?      @db.Uuid
   name           String       @db.VarChar(100)
@@ -167,14 +167,14 @@ type Role {
   @@map("roles")
 }
 
-type PermissionGroup {
+model PermissionGroup {
   id          String       @id @default(uuid()) @db.Uuid
   name        String       @unique @db.VarChar(100)
   permissions Permission[]
   @@map("permission_groups")
 }
 
-type Permission {
+model Permission {
   id          String          @id @default(uuid()) @db.Uuid
   groupId     String?         @db.Uuid
   code        String          @unique @db.VarChar(150)
@@ -184,7 +184,7 @@ type Permission {
   @@map("permissions")
 }
 
-type RolePermission {
+model RolePermission {
   roleId       String     @db.Uuid
   permissionId String     @db.Uuid
   role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
@@ -193,7 +193,7 @@ type RolePermission {
   @@map("role_permissions")
 }
 
-type UserRole {
+model UserRole {
   userId String @db.Uuid
   roleId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -202,7 +202,7 @@ type UserRole {
   @@map("user_roles")
 }
 
-type UserBranch {
+model UserBranch {
   userId   String @db.Uuid
   branchId String @db.Uuid
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -211,7 +211,7 @@ type UserBranch {
   @@map("user_branches")
 }
 
-type UserDepartment {
+model UserDepartment {
   userId       String     @db.Uuid
   departmentId String     @db.Uuid
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -220,7 +220,7 @@ type UserDepartment {
   @@map("user_departments")
 }
 
-type UserInvitation {
+model UserInvitation {
   id         String   @id @default(uuid()) @db.Uuid
   userId     String   @db.Uuid
   tokenHash  String   @unique
@@ -232,7 +232,7 @@ type UserInvitation {
   @@map("user_invitations")
 }
 
-type UserSession {
+model UserSession {
   id           String   @id @default(uuid()) @db.Uuid
   userId       String   @db.Uuid
   tokenHash    String   @unique
@@ -247,7 +247,7 @@ type UserSession {
   @@map("user_sessions")
 }
 
-type PasswordReset {
+model PasswordReset {
   id         String   @id @default(uuid()) @db.Uuid
   userId     String   @db.Uuid
   tokenHash  String   @unique
@@ -258,7 +258,7 @@ type PasswordReset {
   @@map("password_resets")
 }
 
-type Party {
+model Party {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   partyType      PartyType
@@ -279,7 +279,7 @@ type Party {
   @@map("parties")
 }
 
-type Farm {
+model Farm {
   id          String   @id @default(uuid()) @db.Uuid
   partyId     String   @unique @db.Uuid
   farmName    String   @db.VarChar(255)
@@ -294,7 +294,7 @@ type Farm {
   @@map("farms")
 }
 
-type Animal {
+model Animal {
   id             String      @id @default(uuid()) @db.Uuid
   partyId        String       @db.Uuid
   name           String       @db.VarChar(150)
@@ -317,7 +317,7 @@ type Animal {
   @@map("animals")
 }
 
-type Appointment {
+model Appointment {
   id             String            @id @default(uuid()) @db.Uuid
   organizationId String            @db.Uuid
   branchId       String?           @db.Uuid
@@ -341,7 +341,7 @@ type Appointment {
   @@map("appointments")
 }
 
-type MedicalRecord {
+model MedicalRecord {
   id             String              @id @default(uuid()) @db.Uuid
   organizationId String              @db.Uuid
   animalId       String              @db.Uuid
@@ -368,7 +368,7 @@ type MedicalRecord {
   @@map("medical_records")
 }
 
-type SoapNote {
+model SoapNote {
   id             String        @id @default(uuid()) @db.Uuid
   medicalRecordId String        @unique @db.Uuid
   subjective     String?
@@ -379,7 +379,7 @@ type SoapNote {
   @@map("soap_notes")
 }
 
-type Prescription {
+model Prescription {
   id             String           @id @default(uuid()) @db.Uuid
   medicalRecordId String           @db.Uuid
   animalId       String           @db.Uuid
@@ -398,7 +398,7 @@ type Prescription {
   @@map("prescriptions")
 }
 
-type Vaccination {
+model Vaccination {
   id             String        @id @default(uuid()) @db.Uuid
   medicalRecordId String       @db.Uuid
   animalId       String        @db.Uuid
@@ -412,7 +412,7 @@ type Vaccination {
   @@map("vaccinations")
 }
 
-type LabResult {
+model LabResult {
   id             String        @id @default(uuid()) @db.Uuid
   medicalRecordId String       @db.Uuid
   testName       String        @db.VarChar(255)
@@ -424,7 +424,7 @@ type LabResult {
   @@map("lab_results")
 }
 
-type Surgery {
+model Surgery {
   id             String        @id @default(uuid()) @db.Uuid
   medicalRecordId String       @db.Uuid
   procedureName  String        @db.VarChar(255)
@@ -435,7 +435,7 @@ type Surgery {
   @@map("surgeries")
 }
 
-type MedicalAttachment {
+model MedicalAttachment {
   id             String        @id @default(uuid()) @db.Uuid
   medicalRecordId String       @db.Uuid
   fileName       String        @db.VarChar(255)
@@ -446,7 +446,7 @@ type MedicalAttachment {
   @@map("medical_attachments")
 }
 
-type ProductCategory {
+model ProductCategory {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   name           String       @db.VarChar(150)
@@ -456,7 +456,7 @@ type ProductCategory {
   @@map("product_categories")
 }
 
-type Product {
+model Product {
   id             String          @id @default(uuid()) @db.Uuid
   organizationId String          @db.Uuid
   categoryId     String?         @db.Uuid
@@ -477,7 +477,7 @@ type Product {
   @@map("products")
 }
 
-type InventoryMovement {
+model InventoryMovement {
   id             String                @id @default(uuid()) @db.Uuid
   organizationId String                @db.Uuid
   productId      String                @db.Uuid
@@ -492,7 +492,7 @@ type InventoryMovement {
   @@map("inventory_movements")
 }
 
-type Supplier {
+model Supplier {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   name           String       @db.VarChar(255)
@@ -506,7 +506,7 @@ type Supplier {
   @@map("suppliers")
 }
 
-type Sale {
+model Sale {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   partyId        String?      @db.Uuid
@@ -520,7 +520,7 @@ type Sale {
   @@map("sales")
 }
 
-type SaleItem {
+model SaleItem {
   id          String   @id @default(uuid()) @db.Uuid
   saleId      String   @db.Uuid
   productId   String?  @db.Uuid
@@ -533,7 +533,7 @@ type SaleItem {
   @@map("sale_items")
 }
 
-type Payment {
+model Payment {
   id             String        @id @default(uuid()) @db.Uuid
   saleId         String?       @db.Uuid
   arInvoiceId    String?       @db.Uuid
@@ -547,7 +547,7 @@ type Payment {
   @@map("payments")
 }
 
-type Expense {
+model Expense {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   category       String       @db.VarChar(100)
@@ -559,7 +559,7 @@ type Expense {
   @@map("expenses")
 }
 
-type ArInvoice {
+model ArInvoice {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   partyId        String       @db.Uuid
@@ -578,7 +578,7 @@ type ArInvoice {
   @@map("ar_invoices")
 }
 
-type ArInvoiceItem {
+model ArInvoiceItem {
   id          String    @id @default(uuid()) @db.Uuid
   invoiceId   String    @db.Uuid
   description String    @db.VarChar(255)
@@ -589,7 +589,7 @@ type ArInvoiceItem {
   @@map("ar_invoice_items")
 }
 
-type ApBill {
+model ApBill {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   supplierId     String       @db.Uuid
@@ -608,7 +608,7 @@ type ApBill {
   @@map("ap_bills")
 }
 
-type ApBillItem {
+model ApBillItem {
   id          String   @id @default(uuid()) @db.Uuid
   billId      String   @db.Uuid
   productId   String?  @db.Uuid
@@ -621,7 +621,7 @@ type ApBillItem {
   @@map("ap_bill_items")
 }
 
-type ApPayment {
+model ApPayment {
   id          String        @id @default(uuid()) @db.Uuid
   billId      String        @db.Uuid
   amount      Decimal       @db.Decimal(14, 2)
@@ -633,7 +633,7 @@ type ApPayment {
   @@map("ap_payments")
 }
 
-type KnowledgeSource {
+model KnowledgeSource {
   id             String             @id @default(uuid()) @db.Uuid
   organizationId String?            @db.Uuid
   name           String             @db.VarChar(255)
@@ -646,7 +646,7 @@ type KnowledgeSource {
   @@map("knowledge_sources")
 }
 
-type KnowledgeDocument {
+model KnowledgeDocument {
   id             String             @id @default(uuid()) @db.Uuid
   sourceId       String             @db.Uuid
   title          String             @db.VarChar(500)
@@ -665,21 +665,21 @@ type KnowledgeDocument {
   @@map("knowledge_documents")
 }
 
-type KnowledgeCategory {
+model KnowledgeCategory {
   id          String @id @default(uuid()) @db.Uuid
   name        String @unique @db.VarChar(150)
   description String?
   @@map("knowledge_categories")
 }
 
-type KnowledgeTag {
+model KnowledgeTag {
   id        String @id @default(uuid()) @db.Uuid
   name      String @unique @db.VarChar(100)
   documents KnowledgeDocumentTag[]
   @@map("knowledge_tags")
 }
 
-type KnowledgeDocumentTag {
+model KnowledgeDocumentTag {
   documentId String           @db.Uuid
   tagId      String           @db.Uuid
   document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
@@ -688,7 +688,7 @@ type KnowledgeDocumentTag {
   @@map("knowledge_document_tags")
 }
 
-type KnowledgeReference {
+model KnowledgeReference {
   id         String           @id @default(uuid()) @db.Uuid
   documentId String           @db.Uuid
   label      String           @db.VarChar(255)
@@ -698,7 +698,7 @@ type KnowledgeReference {
   @@map("knowledge_references")
 }
 
-type ClinicalCase {
+model ClinicalCase {
   id             String            @id @default(uuid()) @db.Uuid
   organizationId String            @db.Uuid
   animalId       String?           @db.Uuid
@@ -717,7 +717,7 @@ type ClinicalCase {
   @@map("clinical_cases")
 }
 
-type PortalAccount {
+model PortalAccount {
   id              String   @id @default(uuid()) @db.Uuid
   userId          String   @unique @db.Uuid
   enabled         Boolean  @default(true)
@@ -727,7 +727,7 @@ type PortalAccount {
   @@map("portal_accounts")
 }
 
-type PortalNotification {
+model PortalNotification {
   id              String        @id @default(uuid()) @db.Uuid
   portalAccountId String        @db.Uuid
   title           String        @db.VarChar(255)
@@ -739,7 +739,7 @@ type PortalNotification {
   @@map("portal_notifications")
 }
 
-type OrganizationWebsite {
+model OrganizationWebsite {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @db.Uuid
   domain         String?      @unique @db.VarChar(255)
@@ -753,7 +753,7 @@ type OrganizationWebsite {
   @@map("organization_websites")
 }
 
-type WebsitePage {
+model WebsitePage {
   id        String             @id @default(uuid()) @db.Uuid
   websiteId String             @db.Uuid
   slug      String             @db.VarChar(150)
@@ -765,7 +765,7 @@ type WebsitePage {
   @@map("website_pages")
 }
 
-type WebsiteMedia {
+model WebsiteMedia {
   id        String             @id @default(uuid()) @db.Uuid
   websiteId String             @db.Uuid
   fileName  String             @db.VarChar(255)
@@ -775,7 +775,7 @@ type WebsiteMedia {
   @@map("website_media")
 }
 
-type SubscriptionPlan {
+model SubscriptionPlan {
   id             String             @id @default(uuid()) @db.Uuid
   code           SubscriptionPlanCode @unique
   name           String             @db.VarChar(100)
@@ -787,7 +787,7 @@ type SubscriptionPlan {
   @@map("subscription_plans")
 }
 
-type Subscription {
+model Subscription {
   id             String             @id @default(uuid()) @db.Uuid
   organizationId String             @db.Uuid
   planId         String             @db.Uuid
@@ -800,7 +800,7 @@ type Subscription {
   @@map("subscriptions")
 }
 
-type AuditLog {
+model AuditLog {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String?      @db.Uuid
   userId         String?      @db.Uuid
