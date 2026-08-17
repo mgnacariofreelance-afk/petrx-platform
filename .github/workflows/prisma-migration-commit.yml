@@ -1,0 +1,38 @@
+name: Prisma Migration Commit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "prisma/schema.prisma"
+      - ".github/workflows/prisma-migration-commit.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  generate-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate initial migration
+        run: |
+          mkdir -p prisma/migrations/20260817080600_initial_schema
+          npx --yes prisma@6 migrate diff \
+            --from-empty \
+            --to-schema-datamodel prisma/schema.prisma \
+            --script > prisma/migrations/20260817080600_initial_schema/migration.sql
+
+      - name: Commit migration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prisma/migrations/20260817080600_initial_schema/migration.sql
+          if git diff --cached --quiet; then
+            echo "Migration is already up to date."
+          else
+            git commit -m "db(prisma): add initial database migration"
+            git push
+          fi
