@@ -113,3 +113,9 @@ export function requireOrganizationPermission(context: OrganizationContext, perm
     throw new Error(`Missing organization permission: ${permission}`);
   }
 }
+
+export function requireOrganizationPermissionOrRedirect(context: OrganizationContext, permission: string) {
+  if (!hasOrganizationPermission(context, permission)) {
+    redirect("/clinic/access-denied");
+  }
+}
