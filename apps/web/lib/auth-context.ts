@@ -75,6 +75,15 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 export async function requireAuthContext() {
   const context = await getAuthContext();
   if (!context) redirect("/login");
+
+  if (
+    context.subscriptionStatus === "TRIAL" &&
+    context.trialExpiresAt &&
+    new Date(context.trialExpiresAt).getTime() <= Date.now()
+  ) {
+    redirect("/trial-expired");
+  }
+
   return context;
 }
 
