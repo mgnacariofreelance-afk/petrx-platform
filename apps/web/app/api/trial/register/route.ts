@@ -13,7 +13,10 @@ const schema = z.object({
     .regex(/[0-9]/, "Password must contain a number"),
 });
 
-const TRIAL_DAYS = Number(process.env.PETRX_TRIAL_DAYS ?? 30);
+const configuredTrialDays = Number(process.env.PETRX_TRIAL_DAYS ?? 30);
+const TRIAL_DAYS = Number.isInteger(configuredTrialDays) && configuredTrialDays >= 1 && configuredTrialDays <= 3650
+  ? configuredTrialDays
+  : 30;
 
 export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
@@ -27,8 +30,8 @@ export async function POST(request: Request) {
 
   const input = parsed.data;
   const admin = createAdminClient();
-  const { data: existingUser } = await admin.from("users").select("id").eq("email", input.email).maybeSingle();
 
+  const { data: existingUser } = await admin.from("users").select("id").eq("email", input.email).maybeSingle();
   if (existingUser) {
     return NextResponse.json({ error: "An account with this email already exists." }, { status: 409 });
   }
@@ -41,21 +44,34 @@ export async function POST(request: Request) {
   });
 
   if (authError || !authData.user) {
-    return NextResponse.json({ error: authError?.message ?? "Unable to create account." }, { status: 400 });
+    const duplicateAuthUser = authError?.code === "email_exists" || authError?.message?.toLowerCase().includes("already been registered");
+    return NextResponse.json(
+      { error: duplicateAuthUser ? "An account with this email already exists." : (authError?.message ?? "Unable to create account.") },
+      { status: duplicateAuthUser ? 409 : 400 },
+    );
   }
 
   const authUserId = authData.user.id;
   const startedAt = new Date();
   const expiresAt = new Date(startedAt.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+  let organizationId: string | null = null;
+  let membershipId: string | null = null;
 
   try {
     const { data: organization, error: organizationError } = await admin
       .from("organizations")
-      .insert({ name: input.organizationName, organization_type: "CLINIC", subscription_status: "TRIAL", trial_started_at: startedAt.toISOString(), trial_expires_at: expiresAt.toISOString() })
+      .insert({
+        name: input.organizationName,
+        organization_type: "CLINIC",
+        subscription_status: "TRIAL",
+        trial_started_at: startedAt.toISOString(),
+        trial_expires_at: expiresAt.toISOString(),
+      })
       .select("id")
       .single();
 
     if (organizationError || !organization) throw new Error(organizationError?.message ?? "Unable to create clinic organization.");
+    organizationId = organization.id;
 
     const { error: userError } = await admin.from("users").insert({
       id: authUserId,
@@ -73,6 +89,7 @@ export async function POST(request: Request) {
       .select("id")
       .single();
     if (membershipError || !membership) throw new Error(membershipError?.message ?? "Unable to create organization membership.");
+    membershipId = membership.id;
 
     const { data: ownerRole, error: roleError } = await admin.from("roles").select("id").eq("code", "ORGANIZATION_OWNER").single();
     if (roleError || !ownerRole) throw new Error("Organization Owner role is not configured.");
@@ -80,9 +97,20 @@ export async function POST(request: Request) {
     const { error: userRoleError } = await admin.from("user_roles").insert({ membership_id: membership.id, role_id: ownerRole.id });
     if (userRoleError) throw new Error(userRoleError.message);
 
-    return NextResponse.json({ success: true, organizationId: organization.id, trialDays: TRIAL_DAYS, trialExpiresAt: expiresAt.toISOString() });
+    return NextResponse.json({
+      success: true,
+      organizationId: organization.id,
+      trialDays: TRIAL_DAYS,
+      trialStartedAt: startedAt.toISOString(),
+      trialExpiresAt: expiresAt.toISOString(),
+    });
   } catch (error) {
+    if (membershipId) await admin.from("user_roles").delete().eq("membership_id", membershipId);
+    if (membershipId) await admin.from("organization_memberships").delete().eq("id", membershipId);
+    await admin.from("users").delete().eq("id", authUserId);
+    if (organizationId) await admin.from("organizations").delete().eq("id", organizationId);
     await admin.auth.admin.deleteUser(authUserId);
+
     return NextResponse.json({ error: error instanceof Error ? error.message : "Trial registration failed." }, { status: 500 });
   }
 }
