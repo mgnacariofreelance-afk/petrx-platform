@@ -1,0 +1,6 @@
+import Link from "next/link";
+import { createDepartment } from "../../../../lib/department-management";
+import { listBranches } from "../../../../lib/branch-management";
+export const dynamic="force-dynamic";
+async function action(formData:FormData){"use server";await createDepartment({branchId:String(formData.get("branchId")),code:String(formData.get("code")),name:String(formData.get("name")),status:"ACTIVE"});}
+export default async function NewDepartment(){const branches=await listBranches();return <main className="workspace-page"><header className="workspace-header"><div><p className="eyebrow">Organization</p><h1>New Department</h1><p className="muted">Create a department under a branch.</p></div><Link className="secondary-button" href="/clinic/departments">Back</Link></header><section className="panel"><form action={action} className="form-grid"><label>Department code<input name="code" required maxLength={30} /></label><label>Department name<input name="name" required maxLength={120} /></label><label>Branch<select name="branchId" required defaultValue=""> <option value="" disabled>Select branch</option>{branches.filter(b=>b.status==="ACTIVE").map(b=><option value={b.id} key={b.id}>{b.name} ({b.code})</option>)}</select></label><div><button className="primary-button" type="submit">Create department</button></div></form></section></main>}
