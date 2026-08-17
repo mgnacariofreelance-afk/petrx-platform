@@ -4,6 +4,7 @@ import { createClient } from "./supabase/server";
 
 export type OrganizationContext = {
   userId: string;
+  email: string;
   membershipId: string;
   organizationId: string;
   organizationName: string;
@@ -53,28 +54,17 @@ export async function getOrganizationContext(): Promise<OrganizationContext | nu
   if (organizationError || rolesError || !organization) return null;
 
   const roleIds = [...new Set((userRoles ?? []).map((item) => item.role_id))];
-  if (!roleIds.length) {
-    return {
-      userId: user.id,
-      membershipId: membership.id,
-      organizationId: organization.id,
-      organizationName: organization.name,
-      organizationType: organization.organization_type,
-      organizationStatus: "ACTIVE",
-      subscriptionStatus: organization.subscription_status,
-      trialStartedAt: organization.trial_started_at,
-      trialExpiresAt: organization.trial_expires_at,
-      roles: [],
-      permissions: [],
-    };
-  }
+  const roleRows = roleIds.length
+    ? (await admin.from("roles").select("id, code").in("id", roleIds)).data ?? []
+    : [];
 
-  const [{ data: roleRows, error: roleError }, { data: rolePermissions, error: permissionError }] = await Promise.all([
-    admin.from("roles").select("id, code").in("id", roleIds),
-    admin.from("role_permissions").select("permission_id").in("role_id", roleIds),
-  ]);
+  if (roleIds.length && roleRows.length !== roleIds.length) return null;
 
-  if (roleError || permissionError) return null;
+  const { data: rolePermissions, error: permissionError } = roleIds.length
+    ? await admin.from("role_permissions").select("permission_id").in("role_id", roleIds)
+    : { data: [], error: null };
+
+  if (permissionError) return null;
 
   const permissionIds = [...new Set((rolePermissions ?? []).map((item) => item.permission_id))];
   const { data: permissionRows, error: permissionsError } = permissionIds.length
@@ -85,6 +75,7 @@ export async function getOrganizationContext(): Promise<OrganizationContext | nu
 
   return {
     userId: user.id,
+    email: user.email ?? authData.user.email ?? "",
     membershipId: membership.id,
     organizationId: organization.id,
     organizationName: organization.name,
@@ -93,7 +84,7 @@ export async function getOrganizationContext(): Promise<OrganizationContext | nu
     subscriptionStatus: organization.subscription_status,
     trialStartedAt: organization.trial_started_at,
     trialExpiresAt: organization.trial_expires_at,
-    roles: [...new Set((roleRows ?? []).map((role) => role.code))],
+    roles: [...new Set(roleRows.map((role) => role.code))],
     permissions: [...new Set((permissionRows ?? []).map((permission) => permission.code))],
   };
 }
