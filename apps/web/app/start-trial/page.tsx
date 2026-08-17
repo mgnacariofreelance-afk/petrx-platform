@@ -6,7 +6,6 @@ import { createClient } from "../../lib/supabase/client";
 
 export default function StartTrialPage() {
   const router = useRouter();
-  const supabase = createClient();
   const [form, setForm] = useState({ organizationName: "", ownerFirstName: "", ownerLastName: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,6 +32,7 @@ export default function StartTrialPage() {
       return;
     }
 
+    const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
     if (signInError) {
       setError("Your trial was created, but automatic sign-in failed. Please sign in manually.");
