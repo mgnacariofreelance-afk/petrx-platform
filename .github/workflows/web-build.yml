@@ -4,13 +4,17 @@ on:
   push:
     paths:
       - 'apps/web/**'
+      - 'prisma/**'
       - 'package.json'
-      - '.github/workflows/web-build.yml'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/**'
   pull_request:
     paths:
       - 'apps/web/**'
+      - 'prisma/**'
       - 'package.json'
-      - '.github/workflows/web-build.yml'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
