@@ -20,6 +20,8 @@ button { cursor: pointer; }
 .sidebar-nav a:hover,.sidebar-nav a:focus,.sidebar-nav a:first-child { background:rgba(255,255,255,.09); color:#fff; }
 .nav-icon { width:18px; text-align:center; font-size:15px; color:#89aaa3; }
 .sidebar-footer { margin-top:auto; border-top:1px solid rgba(255,255,255,.08); padding-top:10px; }
+.logout-button { width:100%; margin-top:3px; text-align:left; background:transparent; color:#a9c1bc; padding:10px 11px; border-radius:8px; font-weight:600; }
+.logout-button:hover { background:rgba(255,255,255,.09); color:#fff; }
 .app-main { flex:1; min-width:0; }
 .topbar { height:68px; background:#fff; border-bottom:1px solid var(--petrx-border); display:flex; align-items:center; gap:18px; padding:0 28px; }
 .mobile-brand { display:none; align-items:center; gap:8px; }
