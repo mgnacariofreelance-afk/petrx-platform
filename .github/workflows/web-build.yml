@@ -1,0 +1,32 @@
+name: Web Application Build
+
+on:
+  push:
+    paths:
+      - 'apps/web/**'
+      - 'package.json'
+      - '.github/workflows/web-build.yml'
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'package.json'
+      - '.github/workflows/web-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install dependencies
+        run: npm install
+      - name: Build Next.js application
+        run: npm run build
