@@ -1,3 +1,5 @@
+import { requireOrganizationContext, requireOrganizationPermissionOrRedirect } from "../../lib/organization-context";
+
 const cards = [
   ["Today’s appointments", "8", "4 awaiting check-in"],
   ["Active patients", "124", "Across this clinic"],
@@ -7,16 +9,30 @@ const cards = [
 
 const actions = ["New client", "New appointment", "Medical record", "Clinical evidence search"];
 
-export default function ClinicPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ClinicPage() {
+  const context = await requireOrganizationContext();
+  requireOrganizationPermissionOrRedirect(context, "organization.read");
+
+  const firstName = context.email.split("@")[0] || "there";
+  const trialDaysRemaining = context.trialExpiresAt
+    ? Math.max(0, Math.ceil((new Date(context.trialExpiresAt).getTime() - Date.now()) / 86_400_000))
+    : null;
+
   return (
     <main className="workspace-page">
       <header className="workspace-header">
         <div>
-          <p className="eyebrow">Clinic workspace</p>
-          <h1>Good morning, Dr. Santos</h1>
-          <p className="muted">Here&apos;s what needs your attention today.</p>
+          <p className="eyebrow">{context.organizationType} workspace</p>
+          <h1>Good morning, {firstName}</h1>
+          <p className="muted">{context.organizationName} · Your organization workspace is ready.</p>
         </div>
-        <div className="workspace-context">Main Branch</div>
+        <div className="workspace-context">
+          {context.subscriptionStatus === "TRIAL" && trialDaysRemaining !== null
+            ? `${trialDaysRemaining} trial day${trialDaysRemaining === 1 ? "" : "s"} left`
+            : context.subscriptionStatus}
+        </div>
       </header>
 
       <section className="stat-grid" aria-label="Clinic overview">
