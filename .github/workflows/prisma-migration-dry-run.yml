@@ -1,0 +1,33 @@
+name: Prisma Migration Dry Run
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "prisma/schema.prisma"
+      - ".github/workflows/prisma-migration-dry-run.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  migration-dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate migration SQL
+        run: |
+          mkdir -p prisma/migration-dry-run
+          npx --yes prisma@6 migrate diff \
+            --from-empty \
+            --to-schema-datamodel prisma/schema.prisma \
+            --script > prisma/migration-dry-run/001_initial.sql
+
+      - name: Upload migration SQL
+        uses: actions/upload-artifact@v4
+        with:
+          name: petrx-initial-migration-sql
+          path: prisma/migration-dry-run/001_initial.sql
+          if-no-files-found: error
