@@ -1,0 +1,4 @@
+import { NextResponse } from "next/server";
+import { inviteOrganizationUser, listOrganizationUsers } from "../../../../lib/user-management";
+export async function GET(){try{return NextResponse.json({users:await listOrganizationUsers()});}catch(error){const message=error instanceof Error?error.message:"REQUEST_FAILED";const status=message==="UNAUTHENTICATED"?401:message.startsWith("Missing organization permission")?403:400;return NextResponse.json({error:message},{status});}}
+export async function POST(request:Request){try{const body=await request.json();return NextResponse.json(await inviteOrganizationUser({email:String(body.email??""),roleCodes:Array.isArray(body.roleCodes)?body.roleCodes.map(String):[]} ),{status:201});}catch(error){const message=error instanceof Error?error.message:"REQUEST_FAILED";const status=message==="UNAUTHENTICATED"?401:message.startsWith("Missing organization permission")?403:400;return NextResponse.json({error:message},{status});}}
