@@ -6,26 +6,16 @@ import {
   type OrganizationContext,
 } from "./organization-context";
 
-export type AuthContext = OrganizationContext & {
-  email: string;
-};
+export type AuthContext = OrganizationContext;
 
 export async function getAuthContext(): Promise<AuthContext | null> {
-  const context = await getOrganizationContext();
-  if (!context) return null;
-
-  const email = "";
-  return { ...context, email };
+  return getOrganizationContext();
 }
 
-export async function requireAuthContext() {
+export async function requireAuthContext(): Promise<AuthContext> {
   const context = await getOrganizationContext();
   if (!context) redirect("/login");
-
-  return {
-    ...context,
-    email: "",
-  } satisfies AuthContext;
+  return context;
 }
 
 export function hasPermission(context: AuthContext, permission: string) {
