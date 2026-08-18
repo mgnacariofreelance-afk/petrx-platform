@@ -72,4 +72,41 @@ export async function createDepartment(input: Omit<Department, "id" | "organizat
     })
     .select("id,organization_id,branch_id,code,name,status")
     .single();
-  if (error) throw new
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateDepartment(id: string, input: Partial<Omit<Department, "id" | "organizationId" | "branchName">>) {
+  const c = await context();
+  const admin = createAdminClient();
+  const { data: existing } = await admin
+    .from("departments")
+    .select("id")
+    .eq("id", id)
+    .eq("organization_id", c.organizationId)
+    .maybeSingle();
+  if (!existing) throw new Error("DEPARTMENT_NOT_FOUND");
+  if (input.branchId) {
+    const { data: branch } = await admin
+      .from("branches")
+      .select("id")
+      .eq("id", input.branchId)
+      .eq("organization_id", c.organizationId)
+      .maybeSingle();
+    if (!branch) throw new Error("BRANCH_NOT_FOUND");
+  }
+  const patch: any = {};
+  if (input.branchId !== undefined) patch.branch_id = input.branchId;
+  if (input.code !== undefined) patch.code = input.code.trim().toUpperCase();
+  if (input.name !== undefined) patch.name = input.name.trim();
+  if (input.status !== undefined) patch.status = input.status;
+  const { data, error } = await admin
+    .from("departments")
+    .update(patch)
+    .eq("id", id)
+    .eq("organization_id", c.organizationId)
+    .select("id,organization_id,branch_id,code,name,status")
+    .single();
+  if (error) throw new Error(error.message);
+  return data;
+}
